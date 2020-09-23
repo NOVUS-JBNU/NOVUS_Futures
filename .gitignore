@@ -63,7 +63,6 @@ vignettes/*.pdf
 # End of https://www.toptal.com/developers/gitignore/api/jupyternotebooks,r
 
 # folders 
-modeling/
+
 
 # files 
-*.ipynb
