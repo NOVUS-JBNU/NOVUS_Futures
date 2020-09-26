@@ -1,12 +1,12 @@
 library(dplyr)
 library(pracma)
 
-hit <- read.csv("2020빅콘테스트_스포츠투아이_제공데이터_팀투수_2020.csv")
+hit <- read.csv("2020빅콘테스트_스포츠투아이_제공데이터_팀투수_2020.csv") # 스포츠투아이 제공 데이터
 
-th <- hit%>%mutate(BA = (HIT)/AB)%>%select(GDAY_DS,T_ID=VS_T_ID,BA) #타율열 생성 및 날짜, 팀이름, 타율 열만 추출
-th$GDAY_DS <- as.Date(as.character(th$GDAY_DS),"%Y%m%d")#날짜열 표준화
+th <- hit%>%mutate(BA = (HIT)/AB)%>%select(GDAY_DS,T_ID=VS_T_ID,BA) # 타율 = 안타수 / 타수, 타율,게임날짜, 팀이름 추출
+th$GDAY_DS <- as.Date(as.character(th$GDAY_DS),"%Y%m%d")#날짜를 표준화
 
-hit_HH <- th%>%filter(T_ID=="HH")%>%select(GDAY_DS,BA) # 팀별 추출
+hit_HH <- th%>%filter(T_ID=="HH")%>%select(GDAY_DS,BA) #각 팀별로 데이터를 분리
 hit_HT <- th%>%filter(T_ID=="HT")%>%select(GDAY_DS,BA)
 hit_KT <- th%>%filter(T_ID=="KT")%>%select(GDAY_DS,BA)
 hit_LG <- th%>%filter(T_ID=="LG")%>%select(GDAY_DS,BA)
@@ -17,7 +17,8 @@ hit_SK <- th%>%filter(T_ID=="SK")%>%select(GDAY_DS,BA)
 hit_SS <- th%>%filter(T_ID=="SS")%>%select(GDAY_DS,BA)
 hit_WO <- th%>%filter(T_ID=="WO")%>%select(GDAY_DS,BA)
 
-#기존데이터와 수집데이터 병합
+#스포츠 투아이 제공 데이터와 네이버 스포츠 추출 데이터 병합
+
 hit_HH <- rbind(hit_HH,read.csv("hitHH.csv"))
 hit_HT <- rbind(hit_HT,read.csv("hitHT.csv"))
 hit_KT <- rbind(hit_KT,read.csv("hitKT.csv"))
@@ -30,7 +31,9 @@ hit_SS <- rbind(hit_SS,read.csv("hitSS.csv"))
 hit_WO <- rbind(hit_WO,read.csv("hitWO.csv"))
 
 
-hit_HH[,2] <- round(movavg(hit_HH[,2],n=18),digits=3 ) #BA열 이동평균하고 소숫점 3자리까지만 출력
+#타율 컬럼 이동평균후에 소수점 3째짜리까지 반올림
+
+hit_HH[,2] <- round(movavg(hit_HH[,2],n=18),digits=3 ) 
 hit_HT[,2] <- round(movavg(hit_HT[,2],n=18),digits=3 )
 hit_KT[,2] <- round(movavg(hit_KT[,2],n=18),digits=3 )
 hit_LG[,2] <- round(movavg(hit_LG[,2],n=18),digits=3 )
@@ -41,10 +44,9 @@ hit_SK[,2] <- round(movavg(hit_SK[,2],n=18),digits=3 )
 hit_SS[,2] <- round(movavg(hit_SS[,2],n=18),digits=3 )
 hit_WO[,2] <- round(movavg(hit_WO[,2],n=18),digits=3 )
 
+#엑셀 파일로 저장.
 
-#엑셀 파일로 만들기.
-
-write.csv(hit_HH,file="hit_HH.csv")
+write.csv(hit_HH,file="hiT_HH.csv")
 write.csv(hit_HT,file="hit_HT.csv")
 write.csv(hit_KT,file="hit_KT.csv")
 write.csv(hit_LG,file="hit_LG.csv")

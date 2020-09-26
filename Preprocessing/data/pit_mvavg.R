@@ -1,19 +1,23 @@
 library(dplyr)
 library(pracma)
-setwd("C:/Users/kw102/Desktop/bigcon/2020빅콘테스트 데이터분석분야-퓨쳐스리그_스포츠투아이_제공데이터(.CSV)_시즌별, 시트별 구분")
-pit <- read.csv("2020빅콘테스트_스포츠투아이_제공데이터_팀투수_2020.csv")
 
-table(pit$WLS) # 승패 열에 "S"값은(세이브) 존재 안함
-pit[pit$WLS=="L","WLS"] <- 0; pit[pit$WLS=="W","WLS"] <- 1; pit[pit$WLS=="D",'WLS'] <- NA
+pit <- read.csv("2020빅콘테스트_스포츠투아이_제공데이터_팀투수_2020.csv") # 스포츠투아이 제공데이터(PIT)
+
+table(pit$WLS) # 승패 컬럼에 "S"값은(세이브) 존재 안함
+
 #WLS 열의 값들을 패는 0 승은 1 무승부는 NA로 변경함.
-pit$WLS <- as.numeric(pit$WLS)
-#값들을 실수형으로 변환
+pit[pit$WLS=="L","WLS"] <- 0; pit[pit$WLS=="W","WLS"] <- 1; pit[pit$WLS=="D",'WLS'] <- NA  
 
+pit$WLS <- as.numeric(pit$WLS)#값들을 실수형으로 변환
+
+
+#날짜, 팀이름, 자책점, 승패 열 추출 (승률은 승패(1,0)의 평균값, 평균자책점은 게임당 자책점)
 tp <- pit%>%select(GDAY_DS,T_ID,ER,WLS)
 tp$GDAY_DS <- as.Date(as.character(tp$GDAY_DS),"%Y%m%d")
-#날짜, 팀이름, 실책점, 승패 열 추출
 
-pit_HH <- tp%>%filter(T_ID=="HH")%>%select(GDAY_DS,ER,WLS)
+#각 팀별로 데이터를 분리
+
+pit_HH<- tp%>%filter(T_ID=="HH")%>%select(GDAY_DS,ER,WLS)
 pit_HT <- tp%>%filter(T_ID=="HT")%>%select(GDAY_DS,ER,WLS)
 pit_KT <- tp%>%filter(T_ID=="KT")%>%select(GDAY_DS,ER,WLS)
 pit_LG <- tp%>%filter(T_ID=="LG")%>%select(GDAY_DS,ER,WLS)
@@ -23,11 +27,9 @@ pit_OB <- tp%>%filter(T_ID=="OB")%>%select(GDAY_DS,ER,WLS)
 pit_SK <- tp%>%filter(T_ID=="SK")%>%select(GDAY_DS,ER,WLS)
 pit_SS <- tp%>%filter(T_ID=="SS")%>%select(GDAY_DS,ER,WLS)
 pit_WO <- tp%>%filter(T_ID=="WO")%>%select(GDAY_DS,ER,WLS)
-#각 팀별로 변수를 만듬
 
-##각팀별 데이터 변환
 
-setwd("C:/Users/kw102/Desktop/bigcon/2020빅콘테스트 데이터분석분야-퓨쳐스리그_스포츠투아이_제공데이터(.CSV)_시즌별, 시트별 구분")
+#스포츠 투아이 제공 데이터와 네이버 스포츠 추출 데이터 병합
 
 pit_HH <- rbind(pit_HH,read.csv("pitHH.csv"))
 pit_HT <- rbind(pit_HT,read.csv("pitHT.csv"))
@@ -40,13 +42,13 @@ pit_SS <- rbind(pit_SS,read.csv("pitSS.csv"))
 pit_SK <- rbind(pit_SK,read.csv("pitSK.csv"))
 pit_WO <- rbind(pit_WO,read.csv("pitWO.csv"))
 
+##각팀별 데이터 변환
 
 a<-c()
 for (i in 1:length(pit_HH$WLS)){
   if (i<=18) a[i] <- mean(pit_HH[1:i,"WLS"],na.rm=T)
   else a[i] <- mean(pit_HH[(i-17):i,"WLS"],na.rm = T)
 }#승률은 18일간의 승,패값의 평균이므로 무승부인 NA값을 제외하고 평균을 구했다. (a값에 승률데이터 대입)
-
 pit_HH$WLS <- round(a,digits=3)#소수점 세세자리로 변환후 팀별 데이터의 승률값에 a값을 넣음
 pit_HH$ER <- round(movavg(pit_HH$ER,n=18),digits=3)# movavg 함수를 이용하여 평균자책점(자책점의 평균)의 이동평균을 구하였다.
 write.csv(pit_HH,file="pit_HH.csv")#데이터를 파일에 저장함
